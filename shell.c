@@ -10,6 +10,10 @@ enum TokenType {
   LESS,
   GREATER,
   SEMICOLON,
+  OPEN_PARENS,
+  CLOSE_PARENS,
+  PIPE,
+  WORD
   // Add more as needed.
 };
 
@@ -60,10 +64,36 @@ void addTokenWithLiteral(enum TokenType type, char *literal) {
   addTokenNoLiteral(type);
   tokens[numTokens - 1].literal = strdup(literal);
 
-  printf("Literal: %s\n", tokens[numTokens - 1].literal);
+  printf("Literal (at %d): %s\n", tokens[numTokens - 1].position,
+         tokens[numTokens - 1].literal);
 }
 
 char advance() { return source[current++]; }
+
+char peek() {
+  if (isAtEnd()) {
+    return '\0';
+  }
+  return source[current];
+}
+
+void string() {
+  while (peek() != '"' && !isAtEnd()) {
+    advance();
+  }
+
+  if (isAtEnd()) {
+    printf("Error: unterminated string.");
+    exit(EXIT_FAILURE);
+  }
+
+  advance(); // Closing "
+
+  char *value =
+      strndup(source + sizeof(char) * (start + 1), current - start - 2);
+
+  addTokenWithLiteral(STRING, value);
+}
 
 void scanToken() {
   char c = advance();
@@ -81,10 +111,26 @@ void scanToken() {
     addTokenNoLiteral(SEMICOLON);
     break;
 
+  case '(':
+    addTokenNoLiteral(OPEN_PARENS);
+    break;
+
+  case ')':
+    addTokenNoLiteral(CLOSE_PARENS);
+    break;
+
+  case '|':
+    addTokenNoLiteral(PIPE);
+    break;
+
   case ' ':
   case '\r':
   case '\t':
   case '\n':
+    break;
+
+  case '"':
+    string();
     break;
 
   default: // Note the colon here
