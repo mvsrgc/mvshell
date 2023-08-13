@@ -4,6 +4,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/wait.h>
+#include <unistd.h>
 
 #define BUFFER_SIZE 256
 #define INITIAL_TOKEN_CAPACITY 8
@@ -123,7 +125,7 @@ char peekNext() {
   return source[current + 1];
 }
 
-int isAlphaNumeric(char c) { return isalpha(c) || isdigit(c); }
+int isAlphaNumeric(char c) { return isalpha(c) || isdigit(c) || c == '-'; }
 
 /**
  * @brief Reads a string token.
@@ -187,7 +189,7 @@ void number() {
  * @return Nothing, the token is added to the tokens array.
  */
 void word() {
-  while (isalpha(peek())) {
+  while (isAlphaNumeric(peek())) {
     advance();
   }
 
@@ -237,7 +239,7 @@ void scanToken() {
   default:
     if (isdigit(c)) {
       number();
-    } else if (isalpha(c)) { // @TODO: Accept _ in word identifier ?
+    } else if (isAlphaNumeric(c)) { // @TODO: Accept _ in word identifier ?
       word();
     } else {
       printf("Error: Unrecognized character.");
@@ -320,6 +322,33 @@ void freeTokens() {
   numTokens = 0;
 }
 
+void run_command() {
+  if (numTokens < 1) {
+    fprintf(stderr, "No command entered.\n");
+    return;
+  }
+
+  char *command = tokens[0].lexeme;
+
+  char *args[numTokens + 1];
+  for (size_t i = 0; i < numTokens; i++) {
+    args[i] = tokens[i].lexeme;
+  }
+
+  args[numTokens] = NULL;
+
+  pid_t pid = fork();
+  if (pid == 0) {
+    execvp(command, args);
+    perror("exec");
+    exit(EXIT_FAILURE);
+  } else if (pid > 0) {
+    wait(NULL);
+  } else {
+    perror("fork");
+  }
+}
+
 int main() {
   source = (char *)malloc(buffer_size); // @TODO: Buffer resize
 
@@ -339,6 +368,8 @@ int main() {
   printf("Received from stdin: %s", source);
 
   scanner(source);
+
+  run_command();
 
   freeTokens();
   free(source);
