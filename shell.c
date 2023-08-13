@@ -1,5 +1,5 @@
 #include "shell.h"
-#include "tokenize.h"
+#include "utils.h"
 #include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -9,27 +9,6 @@
 
 #define BUFFER_SIZE 256
 #define INITIAL_TOKEN_CAPACITY 8
-
-enum TokenType {
-  STRING,
-  NUMBER,
-  LESS,
-  GREATER,
-  SEMICOLON,
-  OPEN_PARENS,
-  CLOSE_PARENS,
-  PIPE,
-  WORD
-  // Add more as needed.
-};
-
-struct Token {
-  enum TokenType type;
-  char *lexeme;
-  char *literal;
-  double value;
-  int position;
-};
 
 size_t buffer_size = BUFFER_SIZE; // Capacity of the input string buffer
 char *source = NULL;
@@ -272,19 +251,6 @@ const char *tokenTypeToString(enum TokenType type) {
   default:
     return "UNKNOWN";
   }
-}
-
-void printTokenDebugInfo(struct Token token) {
-  printf("Type: %-10s Position: %-5d Literal: %-20s Lexeme: %-20s",
-         tokenTypeToString(token.type), token.position,
-         token.literal ? token.literal : "N/A",
-         token.lexeme ? token.lexeme : "N/A");
-
-  if (token.type == NUMBER) {
-    printf(" Value: %f", token.value);
-  }
-
-  printf("\n");
 }
 
 void scanner(char *source) {
