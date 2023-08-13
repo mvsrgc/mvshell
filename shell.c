@@ -5,6 +5,9 @@
 #include <stdlib.h>
 #include <string.h>
 
+#define BUFFER_SIZE 256
+#define INITIAL_TOKEN_CAPACITY 8
+
 enum TokenType {
   STRING,
   NUMBER,
@@ -26,22 +29,30 @@ struct Token {
   int position;
 };
 
-size_t buffer_size = 256; // Capacity of the input string buffer
+size_t buffer_size = BUFFER_SIZE; // Capacity of the input string buffer
 char *source = NULL;
 
 struct Token *tokens = NULL;
-size_t numTokens = 0; // How many tokens we've parsed
-size_t capacity = 8;  // Capacity of the token buffer
+size_t numTokens = 0;                     // How many tokens we've parsed
+size_t capacity = INITIAL_TOKEN_CAPACITY; // Capacity of the token buffer
 
 int start = 0;   // Start of the current token being scanned
 int current = 0; // Current position in the input string
 
+int source_length = 0;
+
+/**
+ * @brief Determines if we've reached the end of the
+ * input string.
+ *
+ * @return If we've reached the end.
+ */
 int isAtEnd() {
   if (source == NULL) {
     exit(EXIT_FAILURE);
   }
 
-  return current >= strlen(source);
+  return current >= source_length;
 }
 
 void addTokenNoLiteral(enum TokenType type) {
@@ -52,7 +63,7 @@ void addTokenNoLiteral(enum TokenType type) {
 
   struct Token new_token;
   new_token.type = type;
-  new_token.lexeme = strndup(source + (1) * start, current - start);
+  new_token.lexeme = strndup(source + start, current - start);
 
   new_token.literal = NULL;
   new_token.value = 0.0;
@@ -77,8 +88,20 @@ void addTokenWithLiteral(enum TokenType type, char *literal, double value) {
   tokens[numTokens - 1].value = value;
 }
 
+/**
+ * @brief Returns the character at the current position,
+ * and then increment the value of current.
+ *
+ * @return The character at position `current`.
+ */
 char advance() { return source[current++]; }
 
+/**
+ * @brief Peeks the character at the current position.
+ * Does not increment the current position.
+ *
+ * @return The character at position `current`.
+ */
 char peek() {
   if (isAtEnd()) {
     return '\0';
@@ -86,8 +109,14 @@ char peek() {
   return source[current];
 }
 
+/**
+ * @brief Peeks the character at the current + 1 position.
+ * Does not increment the current position.
+ *
+ * @return The character at position `current + 1`.
+ */
 char peekNext() {
-  if (current + 1 >= strlen(source)) {
+  if (current + 1 >= source_length) {
     return '\0';
   }
 
@@ -96,7 +125,14 @@ char peekNext() {
 
 int isAlphaNumeric(char c) { return isalpha(c) || isdigit(c); }
 
+/**
+ * @brief Reads a string token.
+ *
+ * @return Nothing, the token is added to the tokens array.
+ */
 void string() {
+  // While we have not reached the end of the string (delimited by ")
+  // or the end of the source string.
   while (peek() != '"' && !isAtEnd()) {
     advance();
   }
@@ -106,18 +142,25 @@ void string() {
     exit(EXIT_FAILURE);
   }
 
-  advance(); // Closing "
+  advance(); // Consume closing "
 
-  char *value = strndup(source + 1 * (start + 1), current - start - 2);
+  // Literal value of the string does not include quotations.
+  char *value = strndup(source + (start + 1), current - start - 2);
 
   addStringToken(STRING, value);
 }
 
+/**
+ * @brief Reads a number token.
+ *
+ * @return Nothing, the token is added to the tokens array.
+ */
 void number() {
   while (isdigit(peek())) {
     advance();
   }
 
+  // Decimal number
   if (peek() == '.' && isdigit(peekNext())) {
     advance();
 
@@ -135,12 +178,20 @@ void number() {
   addNumberToken(NUMBER, value);
 }
 
+/**
+ * @brief Reads a word token.
+ * A word token differs from a string token
+ * because a string token is quoted whereas a
+ * word token is not quoted.
+ *
+ * @return Nothing, the token is added to the tokens array.
+ */
 void word() {
   while (isalpha(peek())) {
     advance();
   }
 
-  char *value = strndup(source + 1 * (start), current - start);
+  char *value = strndup(source + start, current - start);
 
   addStringToken(WORD, value);
 }
@@ -186,7 +237,7 @@ void scanToken() {
   default:
     if (isdigit(c)) {
       number();
-    } else if (isalpha(c)) { // @TODO: Accept _ ?
+    } else if (isalpha(c)) { // @TODO: Accept _ in word identifier ?
       word();
     } else {
       printf("Error: Unrecognized character.");
@@ -250,6 +301,10 @@ void scanner(char *source) {
   printf("Nb. recognized tokens: %zu", numTokens);
 }
 
+/**
+ * @brief Cleanup allocated memory
+ *
+ */
 void freeTokens() {
   if (tokens == NULL) {
     return;
@@ -266,7 +321,7 @@ void freeTokens() {
 }
 
 int main() {
-  source = (char *)malloc(1 * buffer_size); // @TODO: Buffer resize
+  source = (char *)malloc(buffer_size); // @TODO: Buffer resize
 
   // If allocation failed, exit
   if (source == NULL) {
@@ -276,9 +331,10 @@ int main() {
   // Error handling for reading from stdin
   if (fgets(source, buffer_size, stdin) == NULL) {
     free(source);
-    free(tokens);
     exit(EXIT_FAILURE);
   }
+
+  source_length = strlen(source);
 
   printf("Received from stdin: %s", source);
 
