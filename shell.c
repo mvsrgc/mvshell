@@ -52,7 +52,7 @@ void addTokenNoLiteral(enum TokenType type) {
 
   struct Token new_token;
   new_token.type = type;
-  new_token.lexeme = strndup(source + (sizeof(char)) * start, current - start);
+  new_token.lexeme = strndup(source + (1) * start, current - start);
 
   new_token.literal = NULL;
   new_token.value = 0.0;
@@ -108,8 +108,7 @@ void string() {
 
   advance(); // Closing "
 
-  char *value =
-      strndup(source + sizeof(char) * (start + 1), current - start - 2);
+  char *value = strndup(source + 1 * (start + 1), current - start - 2);
 
   addStringToken(STRING, value);
 }
@@ -141,7 +140,7 @@ void word() {
     advance();
   }
 
-  char *value = strndup(source + sizeof(char) * (start), current - start);
+  char *value = strndup(source + 1 * (start), current - start);
 
   addStringToken(WORD, value);
 }
@@ -187,7 +186,7 @@ void scanToken() {
   default:
     if (isdigit(c)) {
       number();
-    } else if (isalpha(c)) { // Accept _ ?
+    } else if (isalpha(c)) { // @TODO: Accept _ ?
       word();
     } else {
       printf("Error: Unrecognized character.");
@@ -229,7 +228,7 @@ void printTokenDebugInfo(struct Token token) {
          token.lexeme ? token.lexeme : "N/A");
 
   if (token.type == NUMBER) {
-    printf(" Value: %f", token.value); // Removed the comma
+    printf(" Value: %f", token.value);
   }
 
   printf("\n");
@@ -241,7 +240,6 @@ void scanner(char *source) {
   while (!isAtEnd()) {
     start = current;
     scanToken();
-
   }
 
   for (int i = 0; i < numTokens; i++) {
@@ -252,8 +250,23 @@ void scanner(char *source) {
   printf("Nb. recognized tokens: %zu", numTokens);
 }
 
+void freeTokens() {
+  if (tokens == NULL) {
+    return;
+  }
+
+  for (size_t i = 0; i < numTokens; i++) {
+    free(tokens[i].lexeme);
+    free(tokens[i].literal);
+  }
+
+  free(tokens);
+  tokens = NULL;
+  numTokens = 0;
+}
+
 int main() {
-  source = (char *)malloc(sizeof(char) * buffer_size);
+  source = (char *)malloc(1 * buffer_size); // @TODO: Buffer resize
 
   // If allocation failed, exit
   if (source == NULL) {
@@ -271,8 +284,8 @@ int main() {
 
   scanner(source);
 
+  freeTokens();
   free(source);
-  free(tokens);
 
   exit(EXIT_SUCCESS);
 }
