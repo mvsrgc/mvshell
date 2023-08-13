@@ -136,6 +136,16 @@ void number() {
   addNumberToken(NUMBER, value);
 }
 
+void word() {
+  while (isalpha(peek())) {
+    advance();
+  }
+
+  char *value = strndup(source + sizeof(char) * (start), current - start);
+
+  addStringToken(WORD, value);
+}
+
 void scanToken() {
   char c = advance();
 
@@ -174,11 +184,11 @@ void scanToken() {
     string();
     break;
 
-  default: // Note the colon here
+  default:
     if (isdigit(c)) {
       number();
     } else if (isalpha(c)) { // Accept _ ?
-      // word();
+      word();
     } else {
       printf("Error: Unrecognized character.");
       exit(EXIT_FAILURE);
@@ -204,6 +214,8 @@ const char *tokenTypeToString(enum TokenType type) {
     return ")";
   case SEMICOLON:
     return ";";
+  case WORD:
+    return "WORD";
   // Add cases for other token types...
   default:
     return "UNKNOWN";
@@ -230,15 +242,14 @@ void scanner(char *source) {
     start = current;
     scanToken();
 
-    struct Token last_token = tokens[numTokens - 1];
+  }
+
+  for (int i = 0; i < numTokens; i++) {
+    struct Token last_token = tokens[i];
     printTokenDebugInfo(last_token);
   }
 
-  printf("Nb. recognized tokens: %zu (", numTokens);
-  for (size_t i = 0; i < numTokens; i++) {
-    printf("%s", tokens[i].lexeme);
-  }
-  printf(")");
+  printf("Nb. recognized tokens: %zu", numTokens);
 }
 
 int main() {
@@ -252,6 +263,7 @@ int main() {
   // Error handling for reading from stdin
   if (fgets(source, buffer_size, stdin) == NULL) {
     free(source);
+    free(tokens);
     exit(EXIT_FAILURE);
   }
 

@@ -24,3 +24,19 @@ Type: >          Position: 37    Literal: N/A                  Lexeme: >
 Type: >          Position: 37    Literal: N/A                  Lexeme: >                   
 Nb. recognized tokens: 15 (<1>"Test|(mvshell)"|<()|"HELLO">>>>>)
 ```
+
+```sh
+❯ ./main
+Testing MVSHELL "It's nice!" (2>1)
+Received from stdin: Testing MVSHELL "It's nice!" (2>1)
+Type: WORD       Position: 0     Literal: Testing              Lexeme: Testing             
+Type: WORD       Position: 8     Literal: MVSHELL              Lexeme: MVSHELL             
+Type: STRING     Position: 16    Literal: It's nice!           Lexeme: "It's nice!"        
+Type: (          Position: 29    Literal: N/A                  Lexeme: (                   
+Type: NUMBER     Position: 30    Literal: N/A                  Lexeme: 2                    Value: 2.000000
+Type: >          Position: 31    Literal: N/A                  Lexeme: >                   
+Type: NUMBER     Position: 32    Literal: N/A                  Lexeme: 1                    Value: 1.000000
+Type: )          Position: 33    Literal: N/A                  Lexeme: )                   
+Nb. recognized tokens: 8
+```
+
