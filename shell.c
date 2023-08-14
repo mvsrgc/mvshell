@@ -1,6 +1,7 @@
 #include "shell.h"
 #include "utils.h"
 #include <ctype.h>
+#include <glob.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -104,7 +105,11 @@ char peekNext() {
   return source[current + 1];
 }
 
-int isAlphaNumeric(char c) { return isalpha(c) || isdigit(c) || c == '-'; }
+int isAlphaNumeric(char c) { return isalpha(c) || isdigit(c); }
+
+int isShellCharacter(char c) {
+  return c == '*' || c == '?' || c == '.' || c == '-';
+}
 
 /**
  * @brief Reads a string token.
@@ -168,13 +173,34 @@ void number() {
  * @return Nothing, the token is added to the tokens array.
  */
 void word() {
-  while (isAlphaNumeric(peek())) {
+  while (isAlphaNumeric(peek()) || isShellCharacter(peek())) {
     advance();
   }
 
   char *value = strndup(source + start, current - start);
 
-  addStringToken(WORD, value);
+  if (strchr(value, '*') || strchr(value, '?')) {
+    glob_t glob_result;
+    memset(&glob_result, 0, sizeof(glob_result));
+
+    int return_value = glob(value, GLOB_TILDE, NULL, &glob_result);
+
+    if (return_value != 0) {
+      printf("Error while globbing\n");
+      exit(EXIT_FAILURE);
+    }
+
+    for (size_t i = 0; i < glob_result.gl_pathc; i++) {
+      char *glob_value = glob_result.gl_pathv[i];
+      addStringToken(WORD, glob_value);
+    }
+
+    globfree(&glob_result);
+  } else {
+    addStringToken(WORD, value);
+  }
+
+  free(value);
 }
 
 void scanToken() {
@@ -218,7 +244,8 @@ void scanToken() {
   default:
     if (isdigit(c)) {
       number();
-    } else if (isAlphaNumeric(c)) { // @TODO: Accept _ in word identifier ?
+    } else if (isAlphaNumeric(c) ||
+               isShellCharacter(c)) { // @TODO: Accept _ in word identifier ?
       word();
     } else {
       printf("Error: Unrecognized character.");
@@ -298,7 +325,7 @@ void run_command() {
 
   char *args[numTokens + 1];
   for (size_t i = 0; i < numTokens; i++) {
-    args[i] = tokens[i].lexeme;
+    args[i] = tokens[i].literal;
   }
 
   args[numTokens] = NULL;
