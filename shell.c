@@ -57,7 +57,14 @@ int isAtEnd() {
   return current >= source_length;
 }
 
-void addTokenNoLiteral(enum TokenType type) {
+/**
+ * @brief Adds a token to the tokens array.
+ *
+ * @param TokenType The type of token
+ * @param char* The literal value of the token
+ * @param double If the token is numeric, it's value
+ */
+void addToken(enum TokenType type, char *literal, double value) {
   if (numTokens == capacity) {
     capacity *= 2;
     tokens = (struct Token *)realloc(tokens, sizeof(struct Token) * capacity);
@@ -66,28 +73,11 @@ void addTokenNoLiteral(enum TokenType type) {
   struct Token new_token;
   new_token.type = type;
   new_token.lexeme = strndup(source + start, current - start);
-
-  new_token.literal = NULL;
-  new_token.value = 0.0;
+  new_token.literal = literal ? strdup(literal) : NULL;
+  new_token.value = value;
   new_token.position = start;
 
   tokens[numTokens++] = new_token;
-}
-
-void addNumberToken(enum TokenType type, double value) {
-  addTokenNoLiteral(type);
-  tokens[numTokens - 1].value = value;
-}
-
-void addStringToken(enum TokenType type, char *literal) {
-  addTokenNoLiteral(type);
-  tokens[numTokens - 1].literal = strdup(literal);
-}
-
-void addTokenWithLiteral(enum TokenType type, char *literal, double value) {
-  addTokenNoLiteral(type);
-  tokens[numTokens - 1].literal = strdup(literal);
-  tokens[numTokens - 1].value = value;
 }
 
 /**
@@ -149,7 +139,7 @@ void string() {
   // Literal value of the string does not include quotations.
   char *value = strndup(source + (start + 1), current - start - 2);
 
-  addStringToken(STRING, value);
+  addToken(STRING, value, 0.0);
 }
 
 /**
@@ -177,7 +167,7 @@ void number() {
 
   double value = strtod(num_substr, NULL);
 
-  addNumberToken(NUMBER, value);
+  addToken(NUMBER, num_substr, value);
 }
 
 /**
@@ -195,7 +185,55 @@ void word() {
 
   char *value = strndup(source + start, current - start);
 
+<<<<<<< Updated upstream
   addStringToken(WORD, value);
+||||||| Stash base
+  if (strchr(value, '*') || strchr(value, '?')) {
+    glob_t glob_result;
+    memset(&glob_result, 0, sizeof(glob_result));
+
+    int return_value = glob(value, GLOB_TILDE, NULL, &glob_result);
+
+    if (return_value != 0) {
+      printf("Error while globbing\n");
+      exit(EXIT_FAILURE);
+    }
+
+    for (size_t i = 0; i < glob_result.gl_pathc; i++) {
+      char *glob_value = glob_result.gl_pathv[i];
+      addStringToken(WORD, glob_value);
+    }
+
+    globfree(&glob_result);
+  } else {
+    addStringToken(WORD, value);
+  }
+
+  free(value);
+=======
+  if (strchr(value, '*') || strchr(value, '?')) {
+    glob_t glob_result;
+    memset(&glob_result, 0, sizeof(glob_result));
+
+    int return_value = glob(value, GLOB_TILDE, NULL, &glob_result);
+
+    if (return_value != 0) {
+      printf("Error while globbing\n");
+      exit(EXIT_FAILURE);
+    }
+
+    for (size_t i = 0; i < glob_result.gl_pathc; i++) {
+      char *glob_value = glob_result.gl_pathv[i];
+      addToken(WORD, glob_value, 0.0);
+    }
+
+    globfree(&glob_result);
+  } else {
+    addToken(WORD, value, 0.0);
+  }
+
+  free(value);
+>>>>>>> Stashed changes
 }
 
 void scanToken() {
@@ -203,27 +241,28 @@ void scanToken() {
 
   switch (c) {
   case '<':
-    addTokenNoLiteral(LESS);
+    addToken(LESS, NULL, 0);
     break;
 
   case '>':
-    addTokenNoLiteral(GREATER);
+    addToken(GREATER, NULL, 0);
     break;
 
   case ';':
-    addTokenNoLiteral(SEMICOLON);
+    addToken(SEMICOLON, NULL, 0);
     break;
 
   case '(':
-    addTokenNoLiteral(OPEN_PARENS);
+    addToken(OPEN_PARENS, NULL, 0);
     break;
 
   case ')':
-    addTokenNoLiteral(CLOSE_PARENS);
+    addToken(CLOSE_PARENS, NULL, 0);
+    break;
     break;
 
   case '|':
-    addTokenNoLiteral(PIPE);
+    addToken(PIPE, NULL, 0);
     break;
 
   case ' ':
@@ -300,7 +339,7 @@ void scanner(char *source) {
     printTokenDebugInfo(last_token);
   }
 
-  printf("Nb. recognized tokens: %zu", numTokens);
+  printf("[%zu token(s)]\n", numTokens);
 }
 
 /**
@@ -364,8 +403,6 @@ int main() {
   }
 
   source_length = strlen(source);
-
-  printf("Received from stdin: %s", source);
 
   scanner(source);
 
