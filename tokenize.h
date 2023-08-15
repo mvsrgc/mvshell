@@ -1,7 +1,11 @@
 #ifndef TOKENIZE_H_
 #define TOKENIZE_H_
 
+#define BUFFER_SIZE 256
+#define INITIAL_TOKEN_CAPACITY 8
+
 #include <stddef.h>
+
 typedef enum {
   STRING,
   NUMBER,
@@ -33,9 +37,31 @@ typedef struct {
   size_t start;
 } TokenizerState;
 
-const char *tokenTypeToString(TokenType type);
+int isAtEnd(TokenizerState *state);
 
 void addToken(TokenizerState *state, TokenType type, char *literal,
               double value);
+
+char advance(TokenizerState *state);
+
+char peek(TokenizerState *state);
+
+char peekNext(TokenizerState *state);
+
+void string(TokenizerState *state);
+void number(TokenizerState *state);
+void word(TokenizerState *state);
+
+void scanToken(TokenizerState *state);
+
+const char *tokenTypeToString(TokenType type);
+
+void scanner(TokenizerState *state);
+
+TokenizerState initializeTokenizerState(size_t bufferSize);
+
+void freeTokens(TokenizerState *state);
+
+void destroyTokenizerState(TokenizerState *state);
 
 #endif // TOKENIZE_H_

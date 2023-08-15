@@ -8,4 +8,8 @@
 
 void printTokenDebugInfo(Token token);
 
+int isAlphaNumeric(char c);
+
+int isShellCharacter(char c);
+
 #endif // UTILS_H_
