@@ -7,34 +7,34 @@
 #include <stddef.h>
 
 typedef enum {
-  STRING,
-  NUMBER,
-  LESS,
-  GREATER,
-  SEMICOLON,
-  OPEN_PARENS,
-  CLOSE_PARENS,
-  PIPE,
-  WORD
-  // Add more as needed.
+    STRING,
+    NUMBER,
+    LESS,
+    GREATER,
+    SEMICOLON,
+    OPEN_PARENS,
+    CLOSE_PARENS,
+    PIPE,
+    WORD
+    // Add more as needed.
 } TokenType;
 
 typedef struct {
-  TokenType type;
-  char *lexeme;
-  char *literal;
-  double value;
-  int position;
+    TokenType type;
+    char *lexeme;
+    char *literal;
+    double value;
+    int position;
 } Token;
 
 typedef struct {
-  Token *tokens;
-  size_t numTokens;
-  size_t capacity;
-  char *source;
-  size_t current;
-  size_t source_length;
-  size_t start;
+    Token *tokens;
+    size_t numTokens;
+    size_t capacity;
+    char *source;
+    size_t current;
+    size_t source_length;
+    size_t start;
 } TokenizerState;
 
 int isAtEnd(TokenizerState *state);
@@ -49,7 +49,9 @@ char peek(TokenizerState *state);
 char peekNext(TokenizerState *state);
 
 void string(TokenizerState *state);
+
 void number(TokenizerState *state);
+
 void word(TokenizerState *state);
 
 void scanToken(TokenizerState *state);
