@@ -13,7 +13,7 @@ void run_command(TokenizerState *state) {
         return;
     }
 
-    char *command = state->tokens[0].lexeme;
+    char *command = state->tokens[0].literal;
 
     char *args[state->numTokens + 1];
     for (size_t i = 0; i < state->numTokens; i++) {

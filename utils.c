@@ -10,12 +10,11 @@ int isShellCharacter(char c) {
 }
 
 void printTokenDebugInfo(Token token) {
-    printf("Type: %-10s Position: %-5d Literal: %-20s Lexeme: %-20s",
-           tokenTypeToString(token.type), token.position,
-           token.literal ? token.literal : "N/A",
-           token.lexeme ? token.lexeme : "N/A");
+    printf("Lexeme: %-10s Position: %-5d Literal: %-10s",
+           lexemeToString(token.lexeme), token.position,
+           token.literal ? token.literal : "N/A");
 
-    if (token.type == NUMBER) {
+    if (token.lexeme == NUMBER) {
         printf(" Value: %f", token.value);
     }
 

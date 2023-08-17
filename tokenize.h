@@ -11,17 +11,17 @@ typedef enum {
     NUMBER,
     LESS,
     GREATER,
+    GREATERGREATER,
     SEMICOLON,
     OPEN_PARENS,
     CLOSE_PARENS,
     PIPE,
     WORD
     // Add more as needed.
-} TokenType;
+} Lexeme;
 
 typedef struct {
-    TokenType type;
-    char *lexeme;
+    Lexeme lexeme;
     char *literal;
     double value;
     int position;
@@ -39,7 +39,7 @@ typedef struct {
 
 int isAtEnd(TokenizerState *state);
 
-void addToken(TokenizerState *state, TokenType type, char *literal,
+void addToken(TokenizerState *state, Lexeme type, char *literal,
               double value);
 
 char advance(TokenizerState *state);
@@ -56,7 +56,7 @@ void word(TokenizerState *state);
 
 void scanToken(TokenizerState *state);
 
-const char *tokenTypeToString(TokenType type);
+const char *lexemeToString(Lexeme type);
 
 void scanner(TokenizerState *state);
 

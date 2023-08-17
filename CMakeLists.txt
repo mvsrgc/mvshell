@@ -11,4 +11,6 @@ add_executable(mvshell
         tokenize.c
         tokenize.h
         utils.c
-        utils.h)
+        utils.h
+        parse.c
+        parse.h)

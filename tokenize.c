@@ -24,22 +24,21 @@ int isAtEnd(TokenizerState *state) {
 /**
  * @brief Adds a token to the tokens array.
  *
- * @param TokenType The type of token
+ * @param TokenType The lexeme of token
  * @param char* The literal value of the token
  * @param double If the token is numeric, it's value
  */
-void addToken(TokenizerState *state, TokenType type, char *literal,
+void addToken(TokenizerState *state, Lexeme type, char *literal,
               double value) {
     if (state->numTokens == state->capacity) {
         state->capacity *= 2;
-        state->tokens =
-                (struct Token *) realloc(state->tokens, sizeof(Token) * state->capacity);
+        state->tokens = (struct Token *) realloc(state->tokens, sizeof(Token) * state->capacity);
     }
 
     Token new_token;
-    new_token.type = type;
-    new_token.lexeme =
-            strndup(state->source + state->start, state->current - state->start);
+    new_token.lexeme = type;
+    //new_token.lexeme =
+            //strndup(state->source + state->start, state->current - state->start);
     new_token.literal = literal ? strdup(literal) : NULL;
     new_token.value = value;
     new_token.position = state->start;
@@ -192,7 +191,12 @@ void scanToken(TokenizerState *state) {
             break;
 
         case '>':
-            addToken(state, GREATER, NULL, 0);
+            if (peek(state) == '>') {
+                advance(state);
+                addToken(state, GREATERGREATER, NULL, 0);
+            } else {
+                addToken(state, GREATER, NULL, 0);
+            }
             break;
 
         case ';':
@@ -205,7 +209,6 @@ void scanToken(TokenizerState *state) {
 
         case ')':
             addToken(state, CLOSE_PARENS, NULL, 0);
-            break;
             break;
 
         case '|':
@@ -235,7 +238,7 @@ void scanToken(TokenizerState *state) {
     }
 }
 
-const char *tokenTypeToString(TokenType type) {
+const char *lexemeToString(Lexeme type) {
     switch (type) {
         case NUMBER:
             return "NUMBER";
@@ -247,6 +250,8 @@ const char *tokenTypeToString(TokenType type) {
             return "<";
         case GREATER:
             return ">";
+        case GREATERGREATER:
+            return ">>";
         case OPEN_PARENS:
             return "(";
         case CLOSE_PARENS:
@@ -297,7 +302,6 @@ void freeTokens(TokenizerState *state) {
     }
 
     for (size_t i = 0; i < state->numTokens; i++) {
-        free(state->tokens[i].lexeme);
         free(state->tokens[i].literal);
     }
 
