@@ -1,4 +1,5 @@
 #include "tokenize.h"
+#include "parse.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -53,7 +54,11 @@ int main() {
 
     scanner(&tokenizerState);
 
-    run_command(&tokenizerState);
+    ParserState parserState = initializeParserState(tokenizerState.numTokens, tokenizerState.tokens);
+
+    parse(&parserState);
+
+    //run_command(&tokenizerState);
 
     destroyTokenizerState(&tokenizerState);
 

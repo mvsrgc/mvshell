@@ -24,7 +24,7 @@ int isAtEnd(TokenizerState *state) {
 /**
  * @brief Adds a token to the tokens array.
  *
- * @param TokenType The lexeme of token
+ * @param Lexeme The lexeme of token
  * @param char* The literal value of the token
  * @param double If the token is numeric, it's value
  */
@@ -38,7 +38,7 @@ void addToken(TokenizerState *state, Lexeme type, char *literal,
     Token new_token;
     new_token.lexeme = type;
     //new_token.lexeme =
-            //strndup(state->source + state->start, state->current - state->start);
+            //strndup(state->source + state->start, state->currentToken - state->start);
     new_token.literal = literal ? strdup(literal) : NULL;
     new_token.value = value;
     new_token.position = state->start;
@@ -47,18 +47,18 @@ void addToken(TokenizerState *state, Lexeme type, char *literal,
 }
 
 /**
- * @brief Returns the character at the current position,
- * and then increment the value of current.
+ * @brief Returns the character at the currentToken currentPosition,
+ * and then increment the value of currentToken.
  *
- * @return The character at position `current`.
+ * @return The character at currentPosition `currentToken`.
  */
 char advance(TokenizerState *state) { return state->source[state->current++]; }
 
 /**
- * @brief Peeks the character at the current position.
- * Does not increment the current position.
+ * @brief Peeks the character at the currentToken currentPosition.
+ * Does not increment the currentToken currentPosition.
  *
- * @return The character at position `current`.
+ * @return The character at currentPosition `currentToken`.
  */
 char peek(TokenizerState *state) {
     if (isAtEnd(state)) {
@@ -68,10 +68,10 @@ char peek(TokenizerState *state) {
 }
 
 /**
- * @brief Peeks the character at the current + 1 position.
- * Does not increment the current position.
+ * @brief Peeks the character at the currentToken + 1 currentPosition.
+ * Does not increment the currentToken currentPosition.
  *
- * @return The character at position `current + 1`.
+ * @return The character at currentPosition `currentToken + 1`.
  */
 char peekNext(TokenizerState *state) {
     if (state->current + 1 >= state->source_length) {
@@ -315,4 +315,8 @@ void destroyTokenizerState(TokenizerState *state) {
 
     free(state->source);
     state->source = NULL;
+    state->current = 0;
+    state->source_length = 0;
+    state->start = 0;
+    state->capacity = 0;
 }

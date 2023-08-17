@@ -1,8 +1,6 @@
 # Mvshell
 
-## Lexer
-
-### Supports various characters
+### Lexes various characters
 ```sh
 ❯ ./main
 <1>"Test|(mvshell)" |<()| "HELLO">>>>>
@@ -37,3 +35,24 @@ Type: WORD       Position: 17    Literal: tokenize.h           Lexeme: t*
 -rw-r--r-- 1 user user 657 Aug 14 23:33 tokenize.h
 ```
 
+### Parses commands using recursive descent
+```sh
+-l
+Lexeme: WORD       Position: 0     Literal: -l        
+[1 token(s)]
+Error: Argument list must be preceded by a command.
+```
+
+```sh
+-l
+Lexeme: WORD       Position: 0     Literal: -l        
+[1 token(s)]
+Error: Argument list must be preceded by a command.
+```
+
+```sh
+ls -l
+Lexeme: WORD       Position: 0     Literal: ls        
+Lexeme: WORD       Position: 3     Literal: -l        
+[2 token(s)]
+```
