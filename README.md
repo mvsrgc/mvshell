@@ -56,3 +56,21 @@ Lexeme: WORD       Position: 0     Literal: ls
 Lexeme: WORD       Position: 3     Literal: -l        
 [2 token(s)]
 ```
+
+### Recognizes types
+
+```sh
+echo 12.2
+Lexeme: WORD       Position: 0     Literal: echo
+Lexeme: NUMBER     Position: 5     Literal: 12.2       Value: 12.200000
+[2 token(s)]
+12.2
+```
+
+```sh
+echo "12.0"
+Lexeme: WORD       Position: 0     Literal: echo
+Lexeme: STRING     Position: 5     Literal: 12.0
+[2 token(s)]
+12.0
+```
