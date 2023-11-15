@@ -7,40 +7,40 @@
 #include <stddef.h>
 
 typedef enum {
-    STRING,
-    NUMBER,
-    LESS,
-    GREATER,
-    GREATERGREATER,
-    SEMICOLON,
-    OPEN_PARENS,
-    CLOSE_PARENS,
-    PIPE,
-    WORD
-    // Add more as needed.
+  STRING,
+  NUMBER,
+  LESS,
+  GREATER,
+  GREATERGREATER,
+  SEMICOLON,
+  OPEN_PARENS,
+  CLOSE_PARENS,
+  PIPE,
+  BACKSLASH,
+  WORD
+  // Add more as needed.
 } Lexeme;
 
 typedef struct {
-    Lexeme lexeme;
-    char *literal;
-    double value;
-    int position;
+  Lexeme lexeme;
+  char *literal;
+  double value;
+  int position;
 } Token;
 
 typedef struct {
-    Token *tokens;
-    size_t numTokens;
-    size_t capacity;
-    char *source;
-    size_t current;
-    size_t source_length;
-    size_t start;
+  Token *tokens;
+  size_t numTokens;
+  size_t capacity;
+  char *source;
+  size_t current;
+  size_t source_length;
+  size_t start;
 } TokenizerState;
 
 int isAtEnd(TokenizerState *state);
 
-void addToken(TokenizerState *state, Lexeme type, char *literal,
-              double value);
+void addToken(TokenizerState *state, Lexeme type, char *literal, double value);
 
 char advance(TokenizerState *state);
 
