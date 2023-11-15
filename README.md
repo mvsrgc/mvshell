@@ -80,8 +80,7 @@ Lexeme: STRING     Position: 5     Literal: 12.0
 ```sh
 echo "\"Hello\", \"mvshell\", \"\"\!\"\""
 Lexeme: WORD       Position: 0     Literal: echo
-Lexeme: WORD       Position: 5     Literal: echo
-Lexeme: STRING     Position: 10    Literal: "Hello", "mvshell", ""\!""
-[3 token(s)]
+Lexeme: STRING     Position: 5     Literal: "Hello", "mvshell", ""\!""
+[2 token(s)]
 "Hello", "mvshell", ""\!""
 ```
